@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitcoin Registration</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:#fff;
+}
+
+.container{
+  width:100%;
+  max-width:400px;
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:15px;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+}
+
+button{
+  background:#f7931a;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.result{margin-top:10px;}
+.success{color:#00e676;}
+.error{color:red;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Bitcoin Registration</h2>
+
+  <input type="text" id="acc" placeholder="Bank Account Number">
+  <input type="text" id="cus" placeholder="Customer Number">
+
+  <button onclick="registerBTC()">Register (₹50,000 Charge)</button>
+
+  <div id="regResult" class="result"></div>
+</div>
+
+<script>
+
+// STORAGE
+function getUsers(){
+  return JSON.parse(localStorage.getItem("sk_bank_users")) || [];
+}
+function saveUsers(users){
+  localStorage.setItem("sk_bank_users", JSON.stringify(users));
+}
+
+// DEMO USER
+function createDemoUser(){
+  let users = getUsers();
+  if(users.length === 0){
+    users.push({
+      fullName:"Demo User",
+      accountNumber:"12345",
+      customerNumber:"999",
+      balance:100000,
+      history:[]
+    });
+    saveUsers(users);
+  }
+}
+createDemoUser();
+
+// GENERATE CODE
+function genCode(){
+  return "SKBTC" + Math.floor(Math.random()*100000);
+}
+
+// REGISTER WITH CHARGE
+function registerBTC(){
+  let acc = document.getElementById("acc").value.trim();
+  let cus = document.getElementById("cus").value.trim();
+  let box = document.getElementById("regResult");
+
+  let users = getUsers();
+  let user = users.find(u => u.accountNumber===acc && u.customerNumber===cus);
+
+  if(!user){
+    show(box,"Invalid Bank Details","error");
+    return;
+  }
+
+  // already registered
+  if(user.activationCode){
+    show(box,"Already Registered ✔ (No extra charge)","error");
+    return;
+  }
+
+  // check balance
+  if(user.balance < 50000){
+    show(box,"Insufficient Balance","error");
+    return;
+  }
+
+  // 💸 DEDUCT CHARGE
+  user.balance -= 50000;
+
+  // GENERATE CODE
+  user.activationCode = genCode();
+
+  // HISTORY
+  user.history.push({
+    type:"Registration Charge",
+    amount:"-50000",
+    date:new Date().toLocaleString()
+  });
+
+  saveUsers(users);
+
+  box.innerHTML = `
+    <p class="success">Registration Successful ✔</p>
+    <p><b>Registration Number:</b> ${user.activationCode}</p>
+    <p><b>Remaining Balance:</b> ₹${user.balance}</p>
+  `;
+}
+
+// HELPER
+function show(box,text,type){
+  box.innerHTML = `<p class="${type}">${text}</p>`;
+}
+
+</script>
+
+</body>
+</html>

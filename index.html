@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitcoin System - Home</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container{
+  text-align:center;
+  background:rgba(255,255,255,0.1);
+  padding:30px;
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+  width:90%;
+  max-width:400px;
+}
+
+h1{
+  margin-bottom:10px;
+}
+
+p{
+  font-size:14px;
+  opacity:0.8;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.register{
+  background:linear-gradient(90deg,#00c6ff,#0072ff);
+  color:#fff;
+}
+
+.login{
+  background:linear-gradient(90deg,#f7931a,#ffb347);
+  color:#fff;
+}
+
+button:hover{
+  opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>₿ Bitcoin System</h1>
+  <p>Secure Digital Banking & Bitcoin Management</p>
+
+  <button class="register" onclick="goRegister()">Register Bitcoin</button>
+  <button class="login" onclick="goLogin()">Login</button>
+</div>
+
+<script>
+function goRegister(){
+  window.location.href = "Open/registration.html";
+}
+
+function goLogin(){
+  window.location.href = "Open/login.html";
+}
+</script>
+
+</body>
+</html>

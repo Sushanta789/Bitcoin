@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delete Bitcoin Account</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:#fff;
+}
+
+.container{
+  width:100%;
+  max-width:400px;
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:15px;
+  backdrop-filter:blur(10px);
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(90deg,#ff4d4d,#ff1a1a);
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.result{
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.1);
+  display:none;
+}
+
+.success{color:#00e676;}
+.error{color:red;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Delete Bitcoin Account</h2>
+
+  <input type="text" id="btcInput" placeholder="Enter Bitcoin Account Number">
+  <button onclick="deleteBTC()">Delete BTC Only</button>
+
+  <div id="resultBox" class="result"></div>
+</div>
+
+<script>
+
+// GET USERS
+function getUsers(){
+  return JSON.parse(localStorage.getItem("sk_bank_users")) || [];
+}
+
+// SAVE USERS
+function saveUsers(users){
+  localStorage.setItem("sk_bank_users", JSON.stringify(users));
+}
+
+// DELETE ONLY BITCOIN DATA
+function deleteBTC(){
+  let btc = btcInput.value.trim();
+  let users = getUsers();
+  let box = document.getElementById("resultBox");
+
+  let user = users.find(u => u.bitcoinAccount === btc);
+
+  if(!user){
+    box.style.display="block";
+    box.innerHTML = `<p class="error">Bitcoin Account Not Found</p>`;
+    return;
+  }
+
+  // REMOVE ONLY BTC DATA
+  delete user.bitcoinAccount;
+  delete user.bitcoinBalance;
+  delete user.bitcoinStatus;
+
+  // OPTIONAL: add history
+  if(!user.history) user.history = [];
+  user.history.push({
+    type:"Bitcoin Deleted",
+    amount:"0",
+    date:new Date().toLocaleString()
+  });
+
+  saveUsers(users);
+
+  box.style.display="block";
+  box.innerHTML = `
+    <p class="success">Bitcoin Account Deleted ✔</p>
+    <p><b>Name:</b> ${user.fullName}</p>
+    <p><b>Bank Account Still Active ✔</b></p>
+  `;
+}
+
+// DOM
+const btcInput = document.getElementById("btcInput");
+
+</script>
+
+</body>
+</html>
+

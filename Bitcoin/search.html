@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Account</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:#fff;
+}
+
+.container{
+  width:100%;
+  max-width:400px;
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:15px;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+}
+
+button{
+  background:#00c6ff;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.result{margin-top:10px;}
+.error{color:red;}
+.success{color:#00e676;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Search by Mobile</h2>
+
+  <input type="text" id="mobileSearch" placeholder="Enter Mobile Number">
+
+  <button onclick="searchUser()">Search</button>
+
+  <div id="resultBox" class="result"></div>
+</div>
+
+<script>
+
+// GET USERS
+function getUsers(){
+  return JSON.parse(localStorage.getItem("sk_bank_users")) || [];
+}
+
+// SEARCH FUNCTION
+function searchUser(){
+  let mobile = document.getElementById("mobileSearch").value.trim();
+  let box = document.getElementById("resultBox");
+
+  let users = getUsers();
+
+  let user = users.find(u => u.mobile === mobile);
+
+  if(!user){
+    box.innerHTML = `<p class="error">User not found ❌</p>`;
+    return;
+  }
+
+  box.innerHTML = `
+    <p class="success"><b>Name:</b> ${user.fullName}</p>
+    <p><b>Registration Number:</b> ${user.activationCode || "Not Generated"}</p>
+  `;
+}
+
+</script>
+
+</body>
+</html>

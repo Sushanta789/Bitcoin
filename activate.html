@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitcoin Activation</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:#fff;
+}
+
+.container{
+  width:100%;
+  max-width:400px;
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:15px;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+}
+
+button{
+  background:#00c6ff;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.result{margin-top:10px;}
+.approved{color:#00e676;}
+.error{color:red;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Bitcoin Activation</h2>
+
+  <!-- ONLY ONE INPUT -->
+  <input type="text" id="regCode" placeholder="Enter Registration Number">
+
+  <button onclick="activateBTC()">Activate</button>
+
+  <div id="resultBox" class="result"></div>
+</div>
+
+<script>
+
+// STORAGE
+function getUsers(){
+  return JSON.parse(localStorage.getItem("sk_bank_users")) || [];
+}
+function saveUsers(users){
+  localStorage.setItem("sk_bank_users", JSON.stringify(users));
+}
+
+// BTC GENERATE
+function genBTC(){
+  return "BTC" + Math.floor(Math.random()*1000000000);
+}
+
+// ACTIVATE USING ONLY REG CODE
+function activateBTC(){
+  let code = document.getElementById("regCode").value.trim();
+  let box = document.getElementById("resultBox");
+
+  let users = getUsers();
+
+  // 🔍 FIND USER BY REGISTRATION CODE
+  let user = users.find(u => u.activationCode === code);
+
+  if(!user){
+    show(box,"Invalid Registration Number ❌","error");
+    return;
+  }
+
+  if(user.bitcoinAccount){
+    show(box,"Already Activated ❌","error");
+    return;
+  }
+
+  if(user.balance < 50000){
+    show(box,"Insufficient Balance","error");
+    return;
+  }
+
+  // PROCESS
+  user.balance -= 50000;
+  user.bitcoinAccount = genBTC();
+  user.bitcoinBalance = Math.floor(Math.random()*5)+1;
+  user.bitcoinStatus = "approved";
+
+  if(!user.history) user.history = [];
+
+  user.history.push({
+    type:"BTC Activation",
+    amount:"-50000",
+    date:new Date().toLocaleString()
+  });
+
+  saveUsers(users);
+
+  box.innerHTML = `
+    <p class="approved">Bitcoin Activated ✔</p>
+    <p><b>BTC Account:</b> ${user.bitcoinAccount}</p>
+  `;
+
+  // redirect
+  setTimeout(()=>{
+    window.location.href="Open/login.html";
+  },2000);
+}
+
+// HELPER
+function show(box,text,type){
+  box.innerHTML = `<p class="${type}">${text}</p>`;
+}
+
+</script>
+
+</body>
+</html>
