@@ -20,6 +20,21 @@ body{
   padding:20px;
   border-radius:15px;
   text-align:center;
+  transition:0.3s;
+}
+
+/* Shake Animation */
+@keyframes shake{
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-8px);}
+  50%{transform:translateX(8px);}
+  75%{transform:translateX(-8px);}
+  100%{transform:translateX(0);}
+}
+
+.shake{
+  animation:shake 0.3s;
+  background:rgba(255,0,0,0.2);
 }
 
 input,button{
@@ -48,7 +63,7 @@ button:hover{
 
 <body>
 
-<div class="container">
+<div class="container" id="box">
   <h2>🔐 Private Access</h2>
 
   <input type="password" id="pinInput" placeholder="Enter Private Password" onkeypress="handleEnter(event)">
@@ -58,73 +73,79 @@ button:hover{
   <div id="msg"></div>
 </div>
 
-<!-- 🔊 Sound -->
-<audio id="errorSound" preload="auto">
-  <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
-</audio>
+<!-- 🔊 MP3 AUDIO -->
+<audio id="errorSound" src="sound/alarm_clock.mp3" preload="auto"></audio>
+<audio id="successSound" src="sound/wood_plank_flicks.mp3" preload="auto"></audio>
 
 <script>
 
 // 🔓 Skip if already unlocked
-if(sessionStorage.getItem("privateAccess") === "granted"){
-  window.location.href = "home.html";
+if(sessionStorage.getItem("privateAccess")==="granted"){
+  window.location.href="home.html";
 }
 
-// 🔐 PASSWORD
 const correctPassword = "Sush@5629$S.K";
-
-// ❌ Attempt limit
 let attempts = 0;
 const maxAttempts = 3;
+
+function playSound(audio){
+  audio.pause();        // stop if already playing
+  audio.currentTime = 0; // reset
+  audio.play().catch(()=>{});
+}
 
 function checkPassword(){
   let inputBox = document.getElementById("pinInput");
   let input = inputBox.value.trim();
   let msg = document.getElementById("msg");
-  let sound = document.getElementById("errorSound");
+  let box = document.getElementById("box");
 
-  // 🚫 Too many attempts
+  let errorSound = document.getElementById("errorSound");
+  let successSound = document.getElementById("successSound");
+
   if(attempts >= maxAttempts){
     msg.innerHTML = `<p class="error">Too many attempts! Redirecting...</p>`;
-    setTimeout(()=>{
-      window.location.href = "index.html";
-    },1500);
+    setTimeout(()=>window.location.href="index.html",1500);
     return;
   }
 
-  // ✅ Correct password
   if(input === correctPassword){
     msg.innerHTML = `<p class="success">Access Granted ✔</p>`;
 
-    sessionStorage.setItem("privateAccess", "granted");
+    // 🔊 Success sound
+    playSound(successSound);
 
-    setTimeout(()=>{
-      window.location.href = "home.html";
-    },1000);
+    sessionStorage.setItem("privateAccess","granted");
+
+    setTimeout(()=>window.location.href="home.html",1000);
 
   } else {
-    // ❌ Wrong password
     attempts++;
+
     msg.innerHTML = `<p class="error">Wrong Password ❌ (${attempts}/${maxAttempts})</p>`;
 
-    // 🔊 Play sound
-    sound.currentTime = 0;
-    sound.play().catch(()=>{});
+    // 🔊 Error sound
+    playSound(errorSound);
 
-    inputBox.value = "";
+    // 📳 Vibration
+    if(navigator.vibrate){
+      navigator.vibrate([200,100,200]);
+    }
 
-    // 🔁 Redirect after max attempts
+    // 🎬 Shake
+    box.classList.add("shake");
+    setTimeout(()=>box.classList.remove("shake"),300);
+
+    inputBox.value="";
+
     if(attempts === maxAttempts){
-      setTimeout(()=>{
-        window.location.href = "../index.html";
-      },1500);
+      setTimeout(()=>window.location.href="../index.html",1500);
     }
   }
 }
 
-// ⌨️ Enter key support
 function handleEnter(e){
-  if(e.key === "Enter"){
+  if(e.key==="Enter"){
     checkPassword();
   }
 }
