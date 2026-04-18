@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction History</title>
+  
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+    }
+    
+    .history {
+      max-height: 300px;
+      overflow: auto;
+      font-size: 13px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #00c6ff;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    hr {
+      border: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="container">
+    <h2>Transaction History</h2>
+    
+    <div id="historyBox" class="history"></div>
+    
+    <button onclick="goBack()">Back to Dashboard</button>
+  </div>
+  
+  <script>
+    let user = JSON.parse(localStorage.getItem("loggedUser"));
+    
+    if (!user) {
+      window.location.href = "login.html";
+    }
+    
+    function loadHistory() {
+      let html = "";
+      
+      if (!user.history || user.history.length === 0) {
+        html = "<p>No transactions found</p>";
+      } else {
+        user.history.slice().reverse().forEach(t => {
+          html += `
+        <p>${t.type} | ${t.amount} | ${t.date}</p>
+        <hr>
+      `;
+        });
+      }
+      
+      document.getElementById("historyBox").innerHTML = html;
+    }
+    
+    function goBack() {
+      window.location.href = "../dashboard.html";
+    }
+    
+    loadHistory();
+  </script>
+  
+</body>
+
+</html>

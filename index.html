@@ -27,9 +27,7 @@ body{
   max-width:400px;
 }
 
-h1{
-  margin-bottom:10px;
-}
+h1{ margin-bottom:10px; }
 
 p{
   font-size:14px;
@@ -49,12 +47,14 @@ button{
 
 .register{
   background:linear-gradient(90deg,#00c6ff,#0072ff);
-  color:#fff;
 }
 
 .login{
   background:linear-gradient(90deg,#f7931a,#ffb347);
-  color:#fff;
+}
+
+.charge{
+  background:linear-gradient(90deg,#ff416c,#ff4b2b);
 }
 
 button:hover{
@@ -71,6 +71,9 @@ button:hover{
 
   <button class="register" onclick="goRegister()">Register Bitcoin</button>
   <button class="login" onclick="goLogin()">Login</button>
+
+  <!-- NEW BUTTON -->
+  <button class="charge" onclick="goCharge()">Search Bitcoin Account</button>
 </div>
 
 <script>
@@ -80,6 +83,11 @@ function goRegister(){
 
 function goLogin(){
   window.location.href = "Open/login.html";
+}
+
+// NEW FUNCTION
+function goCharge(){
+  window.location.href = "search.html";
 }
 </script>
 

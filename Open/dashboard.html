@@ -24,13 +24,6 @@ body{
   border-radius:15px;
 }
 
-.history{
-  margin-top:10px;
-  max-height:150px;
-  overflow:auto;
-  font-size:13px;
-}
-
 button{
   width:100%;
   padding:10px;
@@ -42,6 +35,7 @@ button{
 }
 
 .delete{background:#9c27b0;color:#fff;}
+.historyBtn{background:#00c6ff;color:#fff;}
 .logout{background:red;color:#fff;}
 
 hr{
@@ -59,17 +53,15 @@ hr{
 
   <div id="userData"></div>
 
-  <!-- DELETE BUTTON -->
+  <!-- BUTTONS -->
+  <button class="historyBtn" onclick="goHistory()">Transaction History</button>
   <button class="delete" onclick="goDelete()">Delete</button>
-
-  <div id="historyBox" class="history"></div>
 
   <button class="logout" onclick="logout()">Logout</button>
 </div>
 
 <script>
 
-// LOAD USER
 let user = JSON.parse(localStorage.getItem("loggedUser"));
 let users = JSON.parse(localStorage.getItem("sk_bank_users")) || [];
 
@@ -77,7 +69,6 @@ if(!user){
   window.location.href = "login.html";
 }
 
-// LOAD DATA
 function loadData(){
   users = JSON.parse(localStorage.getItem("sk_bank_users")) || [];
   user = users.find(u => u.bitcoinAccount === user.bitcoinAccount);
@@ -89,11 +80,8 @@ function loadData(){
 
   localStorage.setItem("loggedUser", JSON.stringify(user));
 
-  // 💰 DEMO BTC PRICE (1 BTC = ₹50,00,000)
   let btcPriceINR = 5000000;
-
   let btcInRupees = user.bitcoinBalance * btcPriceINR;
-  let totalBalance = user.balance + btcInRupees;
 
   document.getElementById("userData").innerHTML = `
     <p><b>Name:</b> ${user.fullName}</p>
@@ -107,33 +95,22 @@ function loadData(){
     <hr>
 
     <p><b>S.K Bank Balance:</b> ₹${user.balance.toLocaleString()}</p>
-
-    <hr>
-
-    <p><b>Total Balance:</b> ₹${totalBalance.toLocaleString()}</p>
   `;
-
-  // HISTORY
-  let html = "<h4>Transaction History</h4>";
-  user.history?.slice().reverse().forEach(t=>{
-    html += `<p>${t.type} | ${t.amount} | ${t.date}</p>`;
-  });
-
-  document.getElementById("historyBox").innerHTML = html;
 }
 
-// DELETE PAGE NAVIGATION
+function goHistory(){
+  window.location.href = "transaction/transaction.html";
+}
+
 function goDelete(){
   window.location.href = "delete.html";
 }
 
-// LOGOUT
 function logout(){
   localStorage.removeItem("loggedUser");
   window.location.href = "login.html";
 }
 
-// INITIAL LOAD
 loadData();
 
 </script>
