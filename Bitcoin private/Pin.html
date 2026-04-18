@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Security Password</title>
+<title>Private Security</title>
 
 <style>
 body{
@@ -32,10 +30,6 @@ input,button{
   border-radius:10px;
 }
 
-input{
-  outline:none;
-}
-
 button{
   background:#00c6ff;
   color:#fff;
@@ -55,42 +49,83 @@ button:hover{
 <body>
 
 <div class="container">
-  <h2>Enter Security Password</h2>
+  <h2>🔐 Private Access</h2>
 
-  <input type="password" id="pinInput" placeholder="Enter Password">
-
-  <button onclick="checkPassword()">Verify</button>
+  <input type="password" id="pinInput" placeholder="Enter Private Password" onkeypress="handleEnter(event)">
+  
+  <button onclick="checkPassword()">Unlock</button>
 
   <div id="msg"></div>
 </div>
 
+<!-- 🔊 Sound -->
+<audio id="errorSound" preload="auto">
+  <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
+</audio>
+
 <script>
 
-// CHECK LOGIN
-let logged = JSON.parse(localStorage.getItem("loggedUser"));
-
-if(!logged){
-  window.location.href = "login.html";
+// 🔓 Skip if already unlocked
+if(sessionStorage.getItem("privateAccess") === "granted"){
+  window.location.href = "home.html";
 }
 
-// 🔐 FIXED PASSWORD
-const correctPassword = "Sush@5629$B-S.K";
+// 🔐 PASSWORD
+const correctPassword = "Sush@5629$S.K";
 
-// VERIFY PASSWORD
+// ❌ Attempt limit
+let attempts = 0;
+const maxAttempts = 3;
+
 function checkPassword(){
-  let input = document.getElementById("pinInput").value.trim();
+  let inputBox = document.getElementById("pinInput");
+  let input = inputBox.value.trim();
   let msg = document.getElementById("msg");
+  let sound = document.getElementById("errorSound");
 
+  // 🚫 Too many attempts
+  if(attempts >= maxAttempts){
+    msg.innerHTML = `<p class="error">Too many attempts! Redirecting...</p>`;
+    setTimeout(()=>{
+      window.location.href = "index.html";
+    },1500);
+    return;
+  }
+
+  // ✅ Correct password
   if(input === correctPassword){
     msg.innerHTML = `<p class="success">Access Granted ✔</p>`;
 
-    // REDIRECT TO DASHBOARD
+    sessionStorage.setItem("privateAccess", "granted");
+
     setTimeout(()=>{
-      window.location.href = "dashboard.html";
+      window.location.href = "home.html";
     },1000);
 
   } else {
-    msg.innerHTML = `<p class="error">Wrong Password ❌</p>`;
+    // ❌ Wrong password
+    attempts++;
+    msg.innerHTML = `<p class="error">Wrong Password ❌ (${attempts}/${maxAttempts})</p>`;
+
+    // 🔊 Play sound
+    sound.currentTime = 0;
+    sound.play().catch(()=>{});
+
+    inputBox.value = "";
+
+    // 🔁 Redirect after max attempts
+    if(attempts === maxAttempts){
+      setTimeout(()=>{
+        window.location.href = "index.html";
+      },1500);
+    }
+  }
+}
+
+// ⌨️ Enter key support
+function handleEnter(e){
+  if(e.key === "Enter"){
+    checkPassword();
   }
 }
 
