@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Password</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:#fff;
+}
+
+.container{
+  width:300px;
+  background:rgba(255,255,255,0.1);
+  padding:20px;
+  border-radius:15px;
+  text-align:center;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+}
+
+input{
+  outline:none;
+}
+
+button{
+  background:#00c6ff;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+.error{color:red;}
+.success{color:#00e676;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Enter Security Password</h2>
+
+  <input type="password" id="pinInput" placeholder="Enter Password">
+
+  <button onclick="checkPassword()">Verify</button>
+
+  <div id="msg"></div>
+</div>
+
+<script>
+
+// CHECK LOGIN
+let logged = JSON.parse(localStorage.getItem("loggedUser"));
+
+if(!logged){
+  window.location.href = "login.html";
+}
+
+// 🔐 FIXED PASSWORD
+const correctPassword = "Sush@5629$B-S.K";
+
+// VERIFY PASSWORD
+function checkPassword(){
+  let input = document.getElementById("pinInput").value.trim();
+  let msg = document.getElementById("msg");
+
+  if(input === correctPassword){
+    msg.innerHTML = `<p class="success">Access Granted ✔</p>`;
+
+    // REDIRECT TO DASHBOARD
+    setTimeout(()=>{
+      window.location.href = "dashboard.html";
+    },1000);
+
+  } else {
+    msg.innerHTML = `<p class="error">Wrong Password ❌</p>`;
+  }
+}
+
+</script>
+
+</body>
+</html>
