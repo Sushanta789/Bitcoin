@@ -3,113 +3,719 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bitcoin Dashboard</title>
+<title>S.K Bank Bitcoin Dashboard</title>
 
 <style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
 body{
-  font-family:Arial;
+  font-family:Arial,sans-serif;
   background:linear-gradient(135deg,#141e30,#243b55);
   display:flex;
   justify-content:center;
   align-items:center;
   min-height:100vh;
   color:#fff;
+  padding:20px;
 }
 
 .container{
   width:100%;
-  max-width:400px;
+  max-width:430px;
   background:rgba(255,255,255,0.1);
-  padding:20px;
+  padding:25px;
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+
+.logo{
+  text-align:center;
+  font-size:30px;
+  font-weight:bold;
+  color:#f7931a;
+  margin-bottom:5px;
+}
+
+.sub{
+  text-align:center;
+  font-size:14px;
+  opacity:0.8;
+  margin-bottom:20px;
+}
+
+.card{
+  background:rgba(255,255,255,0.08);
+  padding:15px;
   border-radius:15px;
+  margin-bottom:15px;
+}
+
+.card p{
+  margin:8px 0;
+  font-size:15px;
+}
+
+.btc{
+  color:#f7931a;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.balance{
+  color:#00ff99;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.portfolio{
+  margin-top:12px;
+  padding:14px;
+  border-radius:14px;
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  background:rgba(0,255,153,0.12);
+  color:#00ff99;
+}
+
+.convertBox{
+  margin-top:15px;
+  background:rgba(255,255,255,0.08);
+  padding:15px;
+  border-radius:15px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin-top:10px;
+  font-size:16px;
 }
 
 button{
   width:100%;
-  padding:10px;
-  margin-top:8px;
+  padding:12px;
+  margin-top:10px;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   cursor:pointer;
   font-weight:bold;
+  font-size:15px;
+  transition:0.3s;
 }
 
-.delete{background:#9c27b0;color:#fff;}
-.historyBtn{background:#00c6ff;color:#fff;}
-.logout{background:red;color:#fff;}
+button:hover{
+  opacity:0.9;
+}
+
+.convertBtn{
+  background:#f7931a;
+  color:#fff;
+}
+
+.sendBtn{
+  background:#00c6ff;
+  color:#fff;
+}
+
+.receiveBtn{
+  background:#00b894;
+  color:#fff;
+}
+
+.historyBtn{
+  background:#6c5ce7;
+  color:#fff;
+}
+
+.logout{
+  background:red;
+  color:#fff;
+}
+
+.result{
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.08);
+}
+
+.success{
+  color:#00ff99;
+}
+
+.error{
+  color:#ff4d4d;
+}
+
+.time{
+  margin-top:10px;
+  font-size:13px;
+  opacity:0.8;
+}
 
 hr{
   border:0;
   border-top:1px solid rgba(255,255,255,0.2);
-  margin:10px 0;
+  margin:15px 0;
 }
+
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <h2>Dashboard</h2>
+
+  <div class="logo">
+    ₿ S.K BANK
+  </div>
+
+  <div class="sub">
+    Bitcoin Digital Banking Dashboard
+  </div>
 
   <div id="userData"></div>
 
-  <!-- BUTTONS -->
-  <button class="historyBtn" onclick="goHistory()">Transaction History</button>
-  <button class="delete" onclick="goDelete()">Delete</button>
+  <!-- CONVERT -->
 
-  <button class="logout" onclick="logout()">Logout</button>
+  <div class="convertBox">
+
+    <h3>
+      Convert ₹ to Bitcoin
+    </h3>
+
+    <input
+      type="number"
+      id="rupees"
+      placeholder="Enter Rupees"
+    >
+
+    <button
+      class="convertBtn"
+      onclick="convertBitcoin()"
+    >
+      Convert to BTC
+    </button>
+
+    <div id="convertResult"></div>
+
+    <hr>
+
+    <!-- SEND BTC -->
+
+    <h3>
+      Send Bitcoin
+    </h3>
+
+    <input
+      type="text"
+      id="receiverBTC"
+      placeholder="Receiver BTC Account"
+    >
+
+    <input
+      type="number"
+      id="sendBTCAmount"
+      placeholder="Enter BTC Amount"
+    >
+
+    <button
+      class="sendBtn"
+      onclick="sendBitcoin()"
+    >
+      Send BTC
+    </button>
+
+    <hr>
+
+    <!-- RECEIVE BTC -->
+
+    <h3>
+      Receive Bitcoin
+    </h3>
+
+    <button
+      class="receiveBtn"
+      onclick="receiveBitcoin()"
+    >
+      Receive Demo BTC
+    </button>
+
+  </div>
+
+  <!-- BUTTONS -->
+
+  <button
+    class="historyBtn"
+    onclick="goHistory()"
+  >
+    Transaction History
+  </button>
+
+  <button
+    class="logout"
+    onclick="logout()"
+  >
+    Logout
+  </button>
+
 </div>
 
 <script>
 
-let user = JSON.parse(localStorage.getItem("loggedUser"));
-let users = JSON.parse(localStorage.getItem("sk_bank_users")) || [];
+// ======================================
+// USER DATA
+// ======================================
+
+let user = JSON.parse(
+  localStorage.getItem("loggedUser")
+);
+
+let users = JSON.parse(
+  localStorage.getItem("sk_bank_users")
+) || [];
+
+// ======================================
+// LOGIN CHECK
+// ======================================
 
 if(!user){
+
+  alert("Please Login First");
+
   window.location.href = "login.html";
 }
 
+// ======================================
+// SAVE USERS
+// ======================================
+
+function saveUsers(){
+
+  localStorage.setItem(
+    "sk_bank_users",
+    JSON.stringify(users)
+  );
+}
+
+// ======================================
+// DATE TIME
+// ======================================
+
+function getTime(){
+
+  return new Date().toLocaleString(
+    "en-IN",
+    {
+      day:"2-digit",
+      month:"2-digit",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit",
+      second:"2-digit"
+    }
+  );
+}
+
+// ======================================
+// LOAD DATA
+// ======================================
+
 function loadData(){
-  users = JSON.parse(localStorage.getItem("sk_bank_users")) || [];
-  user = users.find(u => u.bitcoinAccount === user.bitcoinAccount);
+
+  users = JSON.parse(
+    localStorage.getItem("sk_bank_users")
+  ) || [];
+
+  user = users.find(
+
+    u =>
+
+    u.bitcoinAccount === user.bitcoinAccount
+
+  );
 
   if(!user){
-    alert("User not found!");
+
+    alert("User Not Found");
+
     return;
   }
 
-  localStorage.setItem("loggedUser", JSON.stringify(user));
+  // fix values
+  if(!user.bitcoinBalance){
+    user.bitcoinBalance = 0;
+  }
 
-  let btcPriceINR = 5000000;
-  let btcInRupees = user.bitcoinBalance * btcPriceINR;
+  if(!user.history){
+    user.history = [];
+  }
 
-  document.getElementById("userData").innerHTML = `
-    <p><b>Name:</b> ${user.fullName}</p>
-    <p><b>BTC Account:</b> ${user.bitcoinAccount}</p>
+  // save logged user
+  localStorage.setItem(
+    "loggedUser",
+    JSON.stringify(user)
+  );
 
-    <hr>
+  // live BTC price
+  let btcPriceINR =
+    5000000 + Math.floor(Math.random()*100000);
 
-    <p><b>Bitcoin Balance:</b> ${user.bitcoinBalance} BTC</p>
-    <p><b>BTC Value:</b> ₹${btcInRupees.toLocaleString()}</p>
+  let btcValue =
+    user.bitcoinBalance * btcPriceINR;
 
-    <hr>
+  let totalPortfolio =
+    user.balance + btcValue;
 
-    <p><b>S.K Bank Balance:</b> ₹${user.balance.toLocaleString()}</p>
+  // UI
+  document.getElementById(
+    "userData"
+  ).innerHTML = `
+
+    <div class="card">
+
+      <p>
+        <b>Name:</b>
+        ${user.fullName}
+      </p>
+
+      <p>
+        <b>Bitcoin Account:</b>
+        ${user.bitcoinAccount}
+      </p>
+
+      <hr>
+
+      <p class="btc">
+        ${user.bitcoinBalance.toFixed(8)} BTC
+      </p>
+
+      <p class="balance">
+        ₹${btcValue.toLocaleString()}
+      </p>
+
+      <p>
+        BTC Price:
+        ₹${btcPriceINR.toLocaleString()}
+      </p>
+
+      <div class="portfolio">
+        Portfolio:
+        ₹${totalPortfolio.toLocaleString()}
+      </div>
+
+      <div class="time">
+        Updated:
+        ${getTime()}
+      </div>
+
+    </div>
+
   `;
 }
 
-function goHistory(){
-  window.location.href = "transaction/transaction.html";
+// ======================================
+// CONVERT BTC
+// ======================================
+
+function convertBitcoin(){
+
+  let amount = parseFloat(
+    document.getElementById("rupees").value
+  );
+
+  let result =
+    document.getElementById("convertResult");
+
+  let btcPriceINR = 5000000;
+
+  // validation
+  if(!amount || amount <= 0){
+
+    result.innerHTML = `
+      <p class="error">
+        Enter Valid Amount
+      </p>
+    `;
+
+    return;
+  }
+
+  // balance check
+  if(user.balance < amount){
+
+    result.innerHTML = `
+      <p class="error">
+        Insufficient Balance
+      </p>
+    `;
+
+    return;
+  }
+
+  // convert
+  let btcAmount = amount / btcPriceINR;
+
+  // update balance
+  user.balance -= amount;
+
+  user.bitcoinBalance += btcAmount;
+
+  // history
+  user.history.push({
+
+    type:"Bitcoin Conversion",
+
+    rupees:amount,
+
+    btc:btcAmount,
+
+    date:getTime()
+
+  });
+
+  // update user
+  let index = users.findIndex(
+
+    u => u.bitcoinAccount === user.bitcoinAccount
+
+  );
+
+  users[index] = user;
+
+  saveUsers();
+
+  loadData();
+
+  // clear
+  document.getElementById("rupees").value = "";
+
+  result.innerHTML = `
+
+    <div class="result">
+
+      <p class="success">
+        Bitcoin Converted Successfully ✔
+      </p>
+
+      <p>
+        ₹${amount.toLocaleString()}
+      </p>
+
+      <p class="btc">
+        ${btcAmount.toFixed(8)} BTC
+      </p>
+
+      <div class="time">
+        ${getTime()}
+      </div>
+
+    </div>
+
+  `;
 }
 
-function goDelete(){
-  window.location.href = "delete.html";
+// ======================================
+// SEND BTC
+// ======================================
+
+function sendBitcoin(){
+
+  let receiver =
+    document.getElementById(
+      "receiverBTC"
+    ).value.trim();
+
+  let amount =
+    parseFloat(
+      document.getElementById(
+        "sendBTCAmount"
+      ).value
+    );
+
+  // validation
+  if(!receiver || !amount || amount <= 0){
+
+    alert("Enter Valid Details");
+
+    return;
+  }
+
+  // balance check
+  if(user.bitcoinBalance < amount){
+
+    alert("Insufficient BTC Balance");
+
+    return;
+  }
+
+  // find receiver
+  let receiverUser = users.find(
+
+    u => u.bitcoinAccount === receiver
+
+  );
+
+  if(!receiverUser){
+
+    alert("Receiver BTC Account Not Found");
+
+    return;
+  }
+
+  // sender deduct
+  user.bitcoinBalance -= amount;
+
+  // receiver add
+  if(!receiverUser.bitcoinBalance){
+    receiverUser.bitcoinBalance = 0;
+  }
+
+  receiverUser.bitcoinBalance += amount;
+
+  // sender history
+  user.history.push({
+
+    type:"BTC Sent",
+
+    amount:`-${amount} BTC`,
+
+    to:receiver,
+
+    date:getTime()
+
+  });
+
+  // receiver history
+  if(!receiverUser.history){
+    receiverUser.history = [];
+  }
+
+  receiverUser.history.push({
+
+    type:"BTC Received",
+
+    amount:`+${amount} BTC`,
+
+    from:user.bitcoinAccount,
+
+    date:getTime()
+
+  });
+
+  // update sender
+  let senderIndex = users.findIndex(
+
+    u => u.bitcoinAccount === user.bitcoinAccount
+
+  );
+
+  users[senderIndex] = user;
+
+  // update receiver
+  let receiverIndex = users.findIndex(
+
+    u => u.bitcoinAccount === receiver
+
+  );
+
+  users[receiverIndex] = receiverUser;
+
+  saveUsers();
+
+  loadData();
+
+  // clear
+  document.getElementById(
+    "receiverBTC"
+  ).value = "";
+
+  document.getElementById(
+    "sendBTCAmount"
+  ).value = "";
+
+  alert("BTC Sent Successfully ✔");
 }
+
+// ======================================
+// RECEIVE DEMO BTC
+// ======================================
+
+function receiveBitcoin(){
+
+  let randomBTC =
+    Number(
+      (Math.random()*0.005).toFixed(8)
+    );
+
+  user.bitcoinBalance += randomBTC;
+
+  user.history.push({
+
+    type:"BTC Received",
+
+    amount:`+${randomBTC} BTC`,
+
+    date:getTime()
+
+  });
+
+  let index = users.findIndex(
+
+    u => u.bitcoinAccount === user.bitcoinAccount
+
+  );
+
+  users[index] = user;
+
+  saveUsers();
+
+  loadData();
+
+  alert(
+    randomBTC +
+    " BTC Received Successfully ✔"
+  );
+}
+
+// ======================================
+// HISTORY
+// ======================================
+
+function goHistory(){
+
+  window.location.href =
+    "transaction/transaction.html";
+}
+
+// ======================================
+// LOGOUT
+// ======================================
 
 function logout(){
-  localStorage.removeItem("loggedUser");
-  window.location.href = "login.html";
+
+  localStorage.removeItem(
+    "loggedUser"
+  );
+
+  alert("Logout Successful ✔");
+
+  window.location.href =
+    "login.html";
 }
+
+// ======================================
+// START
+// ======================================
 
 loadData();
 

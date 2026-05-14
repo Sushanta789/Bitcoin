@@ -6,23 +6,38 @@
 <title>Bitcoin Search</title>
 
 <style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
 body{
-  font-family:Arial;
+  font-family:Arial,sans-serif;
   background:linear-gradient(135deg,#141e30,#243b55);
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
+  min-height:100vh;
   color:#fff;
+  padding:20px;
 }
 
 .container{
   width:100%;
-  max-width:400px;
+  max-width:420px;
   background:rgba(255,255,255,0.1);
-  padding:20px;
-  border-radius:15px;
+  padding:25px;
+  border-radius:20px;
   backdrop-filter:blur(10px);
+  box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:20px;
+  color:#f7931a;
 }
 
 input{
@@ -31,6 +46,8 @@ input{
   margin:10px 0;
   border:none;
   border-radius:10px;
+  font-size:16px;
+  outline:none;
 }
 
 button{
@@ -42,62 +59,222 @@ button{
   color:#fff;
   font-weight:bold;
   cursor:pointer;
+  font-size:16px;
+  transition:0.3s;
+}
+
+button:hover{
+  opacity:0.9;
 }
 
 .result{
   margin-top:15px;
-  padding:12px;
+  padding:15px;
   border-radius:10px;
-  background:rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.08);
   display:none;
 }
 
-.error{color:red;}
+.result p{
+  margin:8px 0;
+  font-size:15px;
+}
+
+.error{
+  color:#ff4d4d;
+}
+
+.success{
+  color:#00ff99;
+}
+
+.copyBtn{
+  margin-top:10px;
+  background:#00b894;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="container">
+
   <h2>Search Bitcoin Account</h2>
 
-  <input type="text" id="mobileInput" placeholder="Enter Mobile Number">
-  <button onclick="searchBTC()">Search</button>
+  <input
+    type="text"
+    id="mobileInput"
+    placeholder="Enter Mobile Number"
+  >
+
+  <button onclick="searchBTC()">
+    Search Account
+  </button>
 
   <div id="resultBox" class="result"></div>
+
 </div>
 
 <script>
 
+// ==========================
 // STORAGE
+// ==========================
+
 function getUsers(){
-  return JSON.parse(localStorage.getItem("sk_bank_users")) || [];
+
+  let data = localStorage.getItem("sk_bank_users");
+
+  if(!data){
+    return [];
+  }
+
+  try{
+    return JSON.parse(data);
+  }catch(error){
+    return [];
+  }
 }
 
-// SEARCH FUNCTION
-function searchBTC(){
-  let mobile = mobileInput.value.trim();
+// ==========================
+// CREATE DEMO USER
+// ==========================
+
+function createDemoUser(){
+
   let users = getUsers();
+
+  if(users.length === 0){
+
+    users.push({
+      fullName:"Demo User",
+      mobile:"9876543210",
+      bitcoinAccount:"BTC-SK-908776",
+      accountNumber:"12345",
+      customerNumber:"999",
+      balance:100000
+    });
+
+    localStorage.setItem(
+      "sk_bank_users",
+      JSON.stringify(users)
+    );
+  }
+}
+
+createDemoUser();
+
+// ==========================
+// SEARCH FUNCTION
+// ==========================
+
+function searchBTC(){
+
+  let mobile = document
+    .getElementById("mobileInput")
+    .value
+    .trim();
+
+  let users = getUsers();
+
   let box = document.getElementById("resultBox");
 
-  let user = users.find(u => u.mobile === mobile);
+  // validation
+  if(mobile === ""){
 
-  if(!user){
-    box.style.display="block";
-    box.innerHTML = `<p class="error">Mobile Number Not Found</p>`;
+    box.style.display = "block";
+
+    box.innerHTML = `
+      <p class="error">
+        Please Enter Mobile Number
+      </p>
+    `;
+
     return;
   }
 
-  // SHOW ONLY NAME + BTC ACCOUNT
-  box.style.display="block";
+  // find user
+  let user = users.find(
+    u => u.mobile === mobile
+  );
+
+  // not found
+  if(!user){
+
+    box.style.display = "block";
+
+    box.innerHTML = `
+      <p class="error">
+        Mobile Number Not Found
+      </p>
+    `;
+
+    return;
+  }
+
+  // bitcoin account check
+  if(!user.bitcoinAccount){
+
+    user.bitcoinAccount =
+      "BTC-SK-" +
+      Math.floor(
+        100000 + Math.random()*900000
+      );
+
+    localStorage.setItem(
+      "sk_bank_users",
+      JSON.stringify(users)
+    );
+  }
+
+  // show result
+  box.style.display = "block";
+
   box.innerHTML = `
-    <p><b>Full Name:</b> ${user.fullName}</p>
-    <p><b>Bitcoin Account:</b> ${user.bitcoinAccount}</p>
+    <p class="success">
+      Account Found ✔
+    </p>
+
+    <p>
+      <b>Full Name:</b>
+      ${user.fullName}
+    </p>
+
+    <p>
+      <b>Mobile:</b>
+      ${user.mobile}
+    </p>
+
+    <p>
+      <b>Bitcoin Account:</b>
+      ${user.bitcoinAccount}
+    </p>
+
+    <p>
+      <b>Balance:</b>
+      ₹${user.balance || 0}
+    </p>
+
+    <button
+      class="copyBtn"
+      onclick="copyBTC('${user.bitcoinAccount}')"
+    >
+      Copy Bitcoin Account
+    </button>
   `;
 }
 
-// DOM
-const mobileInput = document.getElementById("mobileInput");
+// ==========================
+// COPY FUNCTION
+// ==========================
+
+function copyBTC(text){
+
+  navigator.clipboard.writeText(text);
+
+  alert("Bitcoin Account Copied ✔");
+}
 
 </script>
 

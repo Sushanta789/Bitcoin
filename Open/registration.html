@@ -6,22 +6,38 @@
 <title>Bitcoin Registration</title>
 
 <style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
 body{
-  font-family:Arial;
+  font-family:Arial,sans-serif;
   background:linear-gradient(135deg,#141e30,#243b55);
   display:flex;
   justify-content:center;
   align-items:center;
-  height:100vh;
+  min-height:100vh;
   color:#fff;
+  padding:20px;
 }
 
 .container{
   width:100%;
-  max-width:400px;
+  max-width:420px;
   background:rgba(255,255,255,0.1);
-  padding:20px;
-  border-radius:15px;
+  backdrop-filter:blur(10px);
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:20px;
+  color:#f7931a;
 }
 
 input,button{
@@ -30,6 +46,12 @@ input,button{
   margin:10px 0;
   border:none;
   border-radius:10px;
+  font-size:16px;
+}
+
+input{
+  background:#fff;
+  color:#000;
 }
 
 button{
@@ -37,109 +59,416 @@ button{
   color:#fff;
   font-weight:bold;
   cursor:pointer;
+  transition:0.3s;
 }
 
-.result{margin-top:10px;}
-.success{color:#00e676;}
-.error{color:red;}
+button:hover{
+  background:#ffad42;
+}
+
+.result{
+  margin-top:15px;
+  padding:15px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.08);
+}
+
+.success{
+  color:#00ff99;
+}
+
+.error{
+  color:#ff4d4d;
+}
+
+.info{
+  margin-top:15px;
+  background:rgba(255,255,255,0.08);
+  padding:12px;
+  border-radius:10px;
+}
+
+.history{
+  margin-top:15px;
+  background:rgba(255,255,255,0.08);
+  padding:12px;
+  border-radius:10px;
+}
+
+.history h3{
+  margin-bottom:10px;
+  color:#f7931a;
+}
+
+.history-item{
+  margin-bottom:10px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+}
+
+.history-item p{
+  margin:4px 0;
+  font-size:14px;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="container">
+
   <h2>Bitcoin Registration</h2>
 
-  <input type="text" id="acc" placeholder="Bank Account Number">
-  <input type="text" id="cus" placeholder="Customer Number">
+  <input
+    type="text"
+    id="acc"
+    placeholder="Bank Account Number"
+  >
 
-  <button onclick="registerBTC()">Register (₹50,000 Charge)</button>
+  <input
+    type="text"
+    id="cus"
+    placeholder="Customer Number"
+  >
+
+  <button onclick="registerBTC()">
+    Register (₹50,000 Charge)
+  </button>
 
   <div id="regResult" class="result"></div>
+
+  <div class="info">
+    <p><b>Demo Account</b></p>
+    <p>Account Number: 12345</p>
+    <p>Customer Number: 999</p>
+  </div>
+
 </div>
 
 <script>
 
-// STORAGE
+// ===================================
+// STORAGE FUNCTIONS
+// ===================================
+
 function getUsers(){
-  return JSON.parse(localStorage.getItem("sk_bank_users")) || [];
-}
-function saveUsers(users){
-  localStorage.setItem("sk_bank_users", JSON.stringify(users));
+
+  let data = localStorage.getItem(
+    "sk_bank_users"
+  );
+
+  if(!data){
+    return [];
+  }
+
+  try{
+    return JSON.parse(data);
+  }catch(error){
+    return [];
+  }
 }
 
-// DEMO USER
+function saveUsers(users){
+
+  localStorage.setItem(
+    "sk_bank_users",
+    JSON.stringify(users)
+  );
+}
+
+// ===================================
+// CREATE DEMO USER
+// ===================================
+
 function createDemoUser(){
+
   let users = getUsers();
+
   if(users.length === 0){
+
     users.push({
+
       fullName:"Demo User",
+
       accountNumber:"12345",
+
       customerNumber:"999",
+
+      mobile:"9876543210",
+
       balance:100000,
+
       history:[]
+
     });
+
     saveUsers(users);
   }
 }
+
 createDemoUser();
 
-// GENERATE CODE
-function genCode(){
-  return "SKBTC" + Math.floor(Math.random()*100000);
+// ===================================
+// DATE & TIME
+// ===================================
+
+function getCurrentDateTime(){
+
+  let now = new Date();
+
+  return now.toLocaleString("en-IN",{
+
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric",
+
+    hour:"2-digit",
+    minute:"2-digit",
+    second:"2-digit"
+
+  });
 }
 
-// REGISTER WITH CHARGE
+// ===================================
+// GENERATE BTC CODE
+// ===================================
+
+function genCode(){
+
+  let random = Math.floor(
+    100000 + Math.random() * 900000
+  );
+
+  return "SKBTC" + random;
+}
+
+// ===================================
+// REGISTER FUNCTION
+// ===================================
+
 function registerBTC(){
-  let acc = document.getElementById("acc").value.trim();
-  let cus = document.getElementById("cus").value.trim();
-  let box = document.getElementById("regResult");
+
+  let acc = document
+    .getElementById("acc")
+    .value
+    .trim();
+
+  let cus = document
+    .getElementById("cus")
+    .value
+    .trim();
+
+  let box = document.getElementById(
+    "regResult"
+  );
+
+  // validation
+  if(acc === "" || cus === ""){
+
+    show(
+      box,
+      "Please Enter All Details",
+      "error"
+    );
+
+    return;
+  }
 
   let users = getUsers();
-  let user = users.find(u => u.accountNumber===acc && u.customerNumber===cus);
 
+  let user = users.find(
+
+    u =>
+
+    u.accountNumber === acc &&
+    u.customerNumber === cus
+
+  );
+
+  // invalid user
   if(!user){
-    show(box,"Invalid Bank Details","error");
+
+    show(
+      box,
+      "Invalid Bank Details",
+      "error"
+    );
+
     return;
   }
 
   // already registered
   if(user.activationCode){
-    show(box,"Already Registered ✔ (No extra charge)","error");
+
+    box.innerHTML = `
+
+      <p class="error">
+        Already Registered ✔
+      </p>
+
+      <br>
+
+      <p>
+        <b>Registration Number:</b>
+        ${user.activationCode}
+      </p>
+
+      <p>
+        <b>Balance:</b>
+        ₹${user.balance}
+      </p>
+
+    `;
+
     return;
   }
 
-  // check balance
+  // insufficient balance
   if(user.balance < 50000){
-    show(box,"Insufficient Balance","error");
+
+    show(
+      box,
+      "Insufficient Balance",
+      "error"
+    );
+
     return;
   }
 
-  // 💸 DEDUCT CHARGE
+  // deduct money
   user.balance -= 50000;
 
-  // GENERATE CODE
+  // create activation code
   user.activationCode = genCode();
 
-  // HISTORY
-  user.history.push({
-    type:"Registration Charge",
-    amount:"-50000",
-    date:new Date().toLocaleString()
-  });
+  // create bitcoin account
+  user.bitcoinAccount =
+    "BTC-SK-" +
+    Math.floor(
+      100000 + Math.random()*900000
+    );
 
+  // fix history
+  if(!user.history){
+    user.history = [];
+  }
+
+  // transaction object
+  let transaction = {
+
+    type:"Bitcoin Registration",
+
+    amount:"-50000",
+
+    remainingBalance:user.balance,
+
+    registrationNumber:user.activationCode,
+
+    bitcoinAccount:user.bitcoinAccount,
+
+    date:getCurrentDateTime()
+
+  };
+
+  // save transaction
+  user.history.push(transaction);
+
+  // save localStorage
   saveUsers(users);
 
+  // show result
   box.innerHTML = `
-    <p class="success">Registration Successful ✔</p>
-    <p><b>Registration Number:</b> ${user.activationCode}</p>
-    <p><b>Remaining Balance:</b> ₹${user.balance}</p>
+
+    <div class="success">
+
+      <p>
+        Registration Successful ✔
+      </p>
+
+      <br>
+
+      <p>
+        <b>Registration Number:</b>
+        ${user.activationCode}
+      </p>
+
+      <p>
+        <b>Bitcoin Account:</b>
+        ${user.bitcoinAccount}
+      </p>
+
+      <p>
+        <b>Remaining Balance:</b>
+        ₹${user.balance}
+      </p>
+
+      <p>
+        <b>Date & Time:</b>
+        ${transaction.date}
+      </p>
+
+    </div>
+
+    <div class="history">
+
+      <h3>
+        Transaction Saved
+      </h3>
+
+      <div class="history-item">
+
+        <p>
+          <b>Type:</b>
+          ${transaction.type}
+        </p>
+
+        <p>
+          <b>Amount:</b>
+          ₹50,000 Debited
+        </p>
+
+        <p>
+          <b>Registration Number:</b>
+          ${transaction.registrationNumber}
+        </p>
+
+        <p>
+          <b>Bitcoin Account:</b>
+          ${transaction.bitcoinAccount}
+        </p>
+
+        <p>
+          <b>Balance:</b>
+          ₹${transaction.remainingBalance}
+        </p>
+
+        <p>
+          <b>Date:</b>
+          ${transaction.date}
+        </p>
+
+      </div>
+
+    </div>
+
   `;
 }
 
-// HELPER
+// ===================================
+// SHOW MESSAGE
+// ===================================
+
 function show(box,text,type){
-  box.innerHTML = `<p class="${type}">${text}</p>`;
+
+  box.innerHTML = `
+
+    <p class="${type}">
+      ${text}
+    </p>
+
+  `;
 }
 
 </script>
